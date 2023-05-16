@@ -11,16 +11,14 @@ using namespace std;
 int			point[100][2];
 int			num = 0;
 
-float factorial(int f_num)
+double factorial(int f_num)
 {
-	int sum = 1;
+	double sum = 1;
 
 	for (int i = 1; i <= f_num; i++)
 	{
 		sum = sum * i;
 	}
-	//cout << f_num << sum << endl;
-
 	return sum;
 }
 
@@ -47,34 +45,29 @@ float bernstein(int bernstein_n, int bernstein_i, float bernstein_t)
 void Draw_Bezier_Curve(void) {
 
 	int curve_degree;
-	int curvepoint_num = 25; // 주어진 선분을 몇 등분 할건지
-	float partial_time;
+	float curvepoint_num = 100; // 주어진 선분을 몇 등분 할건지
+	float partial_time;			// n등분한 선분의 길이
 	float time;
 	float sum_x, sum_y;
 
 	curve_degree = num - 1;
-	partial_time = 1.0 / curvepoint_num; // n등분한 선분의 길이
+	partial_time = 1.0 / curvepoint_num; 
 
 	glColor3f(1.0, 1.0, 0.0);
 
 	glBegin(GL_LINE_STRIP);
-	
-	for (time = partial_time; time <= 1.0; time = time + partial_time) //n 등분한 선분의 길이 합이 1이 넘기전까지 반복
-	{
 
+	for (time = 0; time <= 1.0; time = time + partial_time) //n 등분한 선분의 길이 합이 1이 넘기전까지 반복
+	{
 		sum_x = 0;
 		sum_y = 0;
-		
+
 		for (int i = 0; i <= curve_degree; i++) // 마우스 클릭시 입력된 점의 개수 - 1만큼 반복
 		{
 			sum_x = sum_x + bernstein(curve_degree, i, time) * point[i][0];
 			sum_y = sum_y + bernstein(curve_degree, i, time) * point[i][1];
 		}
-
 		glVertex2f(sum_x, sum_y);
-		cout << "x: " << sum_x << " y: " << sum_y << endl;
-
-		
 	}
 	glEnd();
 
