@@ -3,7 +3,6 @@
 #include <gl/gl.h>
 #include <gl/glut.h> // (or others, depending on the system in use)
 #include <iostream>
-using namespace std;
 
 #define		Window_Width	800
 #define		Window_Height	800
@@ -11,66 +10,54 @@ using namespace std;
 int			point[100][2];
 int			num = 0;
 
-double factorial(int f_num)
+double factorial(int n)
 {
-	double sum = 1;
-
-	for (int i = 1; i <= f_num; i++)
-	{
-		sum = sum * i;
-	}
-	return sum;
+	if (n <= 1) return 1;
+	else return n * factorial(n - 1);
 }
 
-float binomial(int binomial_n, int binomial_i)
+double binomial(int n, int i) // 조합
 {
-	float value = 0;
-
-	value = factorial(binomial_n) / (factorial(binomial_n - binomial_i) * factorial(binomial_i));
-
+	float value = factorial(n) / (factorial(n - i) * factorial(i));
 	return value;
 }
 
-float bernstein(int bernstein_n, int bernstein_i, float bernstein_t)
+float bernstein(int degree, int index, float time)
 {
-	float b_value = 0;
-
-	b_value = binomial(bernstein_n, bernstein_i)
-		* pow(1.0 - bernstein_t, bernstein_n - bernstein_i)
-		* pow(bernstein_t, bernstein_i);
-
-	return b_value;
+	float value;
+	value = binomial(degree, index) * pow((1 - time), degree - index) * pow(time, index);
+	return value;
 }
 
-void Draw_Bezier_Curve(void) {
-
+void Draw_Bezier_Curve(void)
+{
 	int curve_degree;
-	float curvepoint_num = 100; // 주어진 선분을 몇 등분 할건지
-	float partial_time;			// n등분한 선분의 길이
-	float time;
-	float sum_x, sum_y;
-
-	curve_degree = num - 1;
-	partial_time = 1.0 / curvepoint_num; 
-
+	int curvepoint_num = 25; // 한 점과 한 점 사이에 몇등분 할것인지
+	float patial_time;
+	float sumx;
+	float sumy;
+	float time = 0;
 	glColor3f(1.0, 1.0, 0.0);
 
+	curve_degree = num - 1; // 점의 개수 - 1 차식
+	patial_time = 1.0 / curvepoint_num;
+
 	glBegin(GL_LINE_STRIP);
-
-	for (time = 0; time <= 1.0; time = time + partial_time) //n 등분한 선분의 길이 합이 1이 넘기전까지 반복
+	for (curvepoint_num; curvepoint_num >= 0; curvepoint_num--) // curvepoint_num 등분한 만큼 반복
 	{
-		sum_x = 0;
-		sum_y = 0;
+		sumx = sumy = 0.0;
 
-		for (int i = 0; i <= curve_degree; i++) // 마우스 클릭시 입력된 점의 개수 - 1만큼 반복
+		for (int i = 0; i <= curve_degree; i++)
 		{
-			sum_x = sum_x + bernstein(curve_degree, i, time) * point[i][0];
-			sum_y = sum_y + bernstein(curve_degree, i, time) * point[i][1];
+			sumx += bernstein(curve_degree, i, time) * point[i][0];
+			sumy += bernstein(curve_degree, i, time) * point[i][1];
 		}
-		glVertex2f(sum_x, sum_y);
+
+		time += patial_time; // curvepoint_num 한부분인 patial_time만큼 0부터 1까지 반복해서 더함
+
+		glVertex2f(sumx, sumy);
 	}
 	glEnd();
-
 }
 void Draw_Control_Points(void) {
 
@@ -83,6 +70,7 @@ void Draw_Control_Points(void) {
 	glEnd();
 
 }
+
 void RenderScene(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -116,6 +104,8 @@ void mouse(int button, int state, int x, int y) {
 	glutPostRedisplay();
 	RenderScene();
 }
+
+
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
